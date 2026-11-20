@@ -1,8 +1,8 @@
 name: generate arcade contribution graphs
 on:
   schedule:
-    - cron: '0 0 * * *'   # Jalan tiap hari jam 00:00
-  workflow_dispatch:       # Bisa dijalankan manual
+    - cron: '0 0 * * *'
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -13,12 +13,33 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - name: generate contribution graph SVGs
+      # 1. Bikin grafik Pacman
+      - name: generate pacman graph
         uses: abozanona/pacman-contribution-graph@main
         with:
           github_user_name: ${{ github.repository_owner }}
-          games: 'pacman,bomberman'  # <-- Game Bomberman ditambahkan di sini
+          games: 'pacman'
 
+      # 2. Ganti nama file Pacman biar ga ketimpa
+      - name: Rename pacman SVG
+        run: |
+          mv dist/pacman-contribution-graph.svg dist/pacman-only.svg
+          mv dist/pacman-contribution-graph-dark.svg dist/pacman-only-dark.svg
+
+      # 3. Bikin grafik Bomberman
+      - name: generate bomberman graph
+        uses: abozanona/pacman-contribution-graph@main
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          games: 'bomberman'
+
+      # 4. Ganti nama file Bomberman
+      - name: Rename bomberman SVG
+        run: |
+          mv dist/pacman-contribution-graph.svg dist/bomberman-only.svg
+          mv dist/pacman-contribution-graph-dark.svg dist/bomberman-only-dark.svg
+
+      # 5. Push semua file ke branch output
       - name: push SVGs to the output branch
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
